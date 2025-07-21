@@ -25,9 +25,3 @@ class Vector3D:
     
     def mult(self, scalar):
         return Vector3D(self.x * scalar, self.y * scalar, self.z * scalar)
-
-    def round(self, epsilon=1e-12):
-        clean_x = 0.0 if abs(self.x) < epsilon else self.x
-        clean_y = 0.0 if abs(self.y) < epsilon else self.y
-        clean_z = 0.0 if abs(self.z) < epsilon else self.z
-        return Vector3D(clean_x, clean_y, clean_z)

@@ -71,8 +71,8 @@ class Quaternion:
         conjugated_vector = Vector3D(-self.x, -self.y, -self.z)
         return Quaternion(self.w, conjugated_vector)
 
-    def rotate(self, vector: Vector3D, epsilon=1e-12):
+    def rotate(self, vector: Vector3D):
         q_vector = Quaternion(0, vector)
         rotated_vector = self * q_vector * self.conjugate()
         result = Vector3D(rotated_vector.x, rotated_vector.y, rotated_vector.z)
-        return result.round(epsilon)
+        return result
