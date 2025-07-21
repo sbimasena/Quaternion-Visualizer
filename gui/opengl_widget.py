@@ -99,7 +99,6 @@ class GLWidget(QOpenGLWidget):
             self.mesh = MeshObject(filename)
             self.rotated_mesh = None
             
-            # Auto-scale the object to fit in view
             self.auto_scale_object()
             
             print(f"GLWidget: Mesh loaded successfully with {len(self.mesh.vertices)} vertices")
@@ -112,7 +111,6 @@ class GLWidget(QOpenGLWidget):
             return False
 
     def auto_scale_object(self):
-        """Automatically scale the object to fit nicely in the view"""
         if self.mesh is None:
             return
             
@@ -136,14 +134,12 @@ class GLWidget(QOpenGLWidget):
         if self.mesh is None:
             return
 
-        # Store rotation parameters for visualization
         self.current_rotation_axis = axis_input.copy()
         self.current_rotation_angle = angle_deg
 
         axis = Vector3D(*axis_input).normalize()
         angle_rad = angle_deg * 3.14159265 / 180
 
-        # Quaternion from axis-angle: q = cos(θ/2) + sin(θ/2)*(xi + yj + zk)
         from math import cos, sin
         w = cos(angle_rad / 2)
         vector_part = axis.normalize().mult(sin(angle_rad / 2))
@@ -160,12 +156,10 @@ class GLWidget(QOpenGLWidget):
         self.update()
 
     def mousePressEvent(self, event: QMouseEvent):
-        """Handle mouse press events for camera rotation"""
         if event.button() == Qt.LeftButton:
             self.last_mouse_pos = event.pos()
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        """Handle mouse move events for camera rotation"""
         if self.last_mouse_pos is not None and event.buttons() & Qt.LeftButton:
             dx = event.x() - self.last_mouse_pos.x()
             dy = event.y() - self.last_mouse_pos.y()
@@ -181,23 +175,20 @@ class GLWidget(QOpenGLWidget):
             self.update()
 
     def mouseReleaseEvent(self, event: QMouseEvent):
-        """Handle mouse release events"""
         if event.button() == Qt.LeftButton:
             self.last_mouse_pos = None
 
     def wheelEvent(self, event):
-        """Handle mouse wheel events for zoom"""
         # Get wheel delta (positive = zoom in, negative = zoom out)
         delta = event.angleDelta().y()
         zoom_factor = 1.1 if delta > 0 else 0.9
         
         self.camera_distance *= zoom_factor
-        self.camera_distance = max(0.5, min(50.0, self.camera_distance))  # Much larger zoom range
+        self.camera_distance = max(0.5, min(50.0, self.camera_distance))  
         
         self.update()
 
     def reset_view(self):
-        """Reset camera and mesh to initial state"""
         self.rotated_mesh = None
         self.camera_distance = 5.0
         self.camera_rotation_x = 0.0
@@ -208,12 +199,10 @@ class GLWidget(QOpenGLWidget):
         self.update()
 
     def set_rotation_params(self, axis, angle):
-        """Set current rotation parameters for visualization"""
         self.current_rotation_axis = axis.copy()
         self.current_rotation_angle = angle
 
     def draw_coordinate_axes(self):
-        """Draw coordinate axes (XYZ) with labels"""
         glDisable(GL_LIGHTING)  # Disable lighting for axes
         glLineWidth(5.0)  # Thicker lines
         
@@ -252,7 +241,6 @@ class GLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)  # Re-enable lighting
 
     def draw_axis_labels(self, axis_length):
-        """Draw simple geometric labels for XYZ axes"""
         glColor3f(1, 1, 1)  # White color for labels
         glLineWidth(3.0)  # Thicker lines for labels
         
@@ -290,7 +278,6 @@ class GLWidget(QOpenGLWidget):
         glLineWidth(1.0)
 
     def draw_rotation_axis(self):
-        """Draw rotation axis as a line through the origin"""
         if not hasattr(self, 'current_rotation_axis'):
             return
             
@@ -303,7 +290,7 @@ class GLWidget(QOpenGLWidget):
         axis = axis / axis_length
         
         glDisable(GL_LIGHTING)
-        glLineWidth(6.0)  # Much thicker line
+        glLineWidth(6.0) 
         
         # Calculate appropriate scale based on object size
         scale = 3.0
@@ -331,7 +318,6 @@ class GLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
 
     def draw_arrow_heads(self, end_point):
-        """Draw arrow heads at the end of rotation axis"""
         arrow_size = 0.2
         
         # Calculate perpendicular vectors for arrow head
@@ -362,7 +348,6 @@ class GLWidget(QOpenGLWidget):
         glEnd()
 
     def draw_angle_labels(self):
-        """Draw angle label and visualization near the rotation axis"""
         if not hasattr(self, 'current_rotation_angle') or not self.show_rotation_axis:
             return
             
@@ -400,17 +385,17 @@ class GLWidget(QOpenGLWidget):
         # Create second perpendicular vector
         perp2 = np.cross(axis, perp)
         
-        # Position the angle display - make it more prominent
-        center_pos = axis * scale * 0.5  # Closer to origin for better visibility
+        # Position the angle display 
+        center_pos = axis * scale * 0.5  
         
-        # Draw circular arc to show angle - make it thicker and more visible
-        glColor3f(1.0, 1.0, 0.0)  # Bright yellow
-        glLineWidth(6.0)  # Much thicker arc
+        # Draw circular arc to show angle
+        glColor3f(1.0, 1.0, 0.0)  
+        glLineWidth(6.0) 
         
         import math
         angle_rad = math.radians(abs(self.current_rotation_angle))
-        num_segments = max(12, int(abs(self.current_rotation_angle) / 5))  # More segments for smoother arc
-        radius = scale * 0.4  # Larger radius for better visibility
+        num_segments = max(12, int(abs(self.current_rotation_angle) / 5)) 
+        radius = scale * 0.4  
         
         glBegin(GL_LINE_STRIP)
         for i in range(num_segments + 1):
@@ -423,12 +408,10 @@ class GLWidget(QOpenGLWidget):
             glVertex3f(pos[0], pos[1], pos[2])
         glEnd()
         
-        # Draw angle value as text-like visualization - position it better
-        text_pos = center_pos + perp * radius * 1.8  # Further out for better visibility
+        text_pos = center_pos + perp * radius * 1.8 
         self.draw_angle_number(text_pos, self.current_rotation_angle)
         
-        # Draw larger markers at start and end of arc
-        glPointSize(12.0)  # Larger points
+        glPointSize(12.0) 
         glBegin(GL_POINTS)
         
         # Start point
@@ -449,18 +432,15 @@ class GLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
 
     def draw_angle_number(self, pos, angle):
-        """Draw angle number using simple geometric shapes - much bigger and clearer"""
-        glColor3f(1.0, 1.0, 1.0)  # White for better visibility
-        glLineWidth(4.0)  # Much thicker lines
+        glColor3f(1.0, 1.0, 1.0)  
+        glLineWidth(4.0) 
         
-        # Draw a larger background for better visibility
-        glPointSize(40.0)  # Much larger background
+        glPointSize(40.0)  
         glColor3f(0.0, 0.0, 0.0)  # Black background
         glBegin(GL_POINTS)
         glVertex3f(pos[0], pos[1], pos[2])
         glEnd()
         
-        # Draw a second layer for even better contrast
         glPointSize(35.0)
         glColor3f(0.2, 0.2, 0.2)  # Dark gray
         glBegin(GL_POINTS)
@@ -468,13 +448,12 @@ class GLWidget(QOpenGLWidget):
         glEnd()
         
         # Draw angle value with bright yellow color
-        glColor3f(1.0, 1.0, 0.0)  # Bright yellow text
+        glColor3f(1.0, 1.0, 0.0) 
         
         # Convert angle to string and draw representation
         angle_str = f"{int(abs(angle))}"
         self.draw_simple_text(pos, angle_str)
         
-        # Draw degree symbol larger
         degree_pos = pos + np.array([len(angle_str) * 0.08, 0.05, 0])
         self.draw_degree_symbol(degree_pos)
         
@@ -482,21 +461,19 @@ class GLWidget(QOpenGLWidget):
         glLineWidth(1.0)
 
     def draw_simple_text(self, pos, text):
-        """Draw simple text using basic geometric shapes - much larger"""
-        glLineWidth(4.0)  # Thicker lines for better visibility
-        char_width = 0.12  # Much larger character spacing
+        glLineWidth(4.0)  
+        char_width = 0.12  
         
         for i, char in enumerate(text):
             char_pos = pos + np.array([i * char_width - (len(text)-1) * char_width * 0.5, 0, 0])  # Center the text
             self.draw_simple_digit(char_pos, char)
 
     def draw_simple_digit(self, pos, digit):
-        """Draw a single digit using line segments - much larger and clearer"""
         if not digit.isdigit():
             return
             
         d = int(digit)
-        size = 0.08  # Much larger size (was 0.03)
+        size = 0.08  
         
         # Define 7-segment display patterns
         segments = {
@@ -557,13 +534,12 @@ class GLWidget(QOpenGLWidget):
         glEnd()
 
     def draw_degree_symbol(self, pos):
-        """Draw degree symbol (small circle) - larger and more visible"""
         import math
         glBegin(GL_LINE_LOOP)
-        radius = 0.03  # Larger radius (was 0.015)
-        for i in range(12):  # More segments for smoother circle
+        radius = 0.03  
+        for i in range(12):  
             angle = 2 * math.pi * i / 12
             x = pos[0] + radius * math.cos(angle)
-            y = pos[1] + radius * math.sin(angle) + 0.05  # Position it higher like a proper degree symbol
+            y = pos[1] + radius * math.sin(angle) + 0.05  
             glVertex3f(x, y, pos[2])
         glEnd()

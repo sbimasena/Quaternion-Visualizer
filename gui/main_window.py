@@ -47,11 +47,6 @@ class MainWindow(QMainWindow):
         self.load_button.clicked.connect(self.load_obj)
         file_layout.addWidget(self.load_button)
         
-        # Add demo button
-        self.demo_button = QPushButton("Load Demo Car")
-        self.demo_button.clicked.connect(self.load_demo_car)
-        file_layout.addWidget(self.demo_button)
-        
         # Object info label
         self.object_info_label = QLabel("No object loaded")
         self.object_info_label.setWordWrap(True)
@@ -166,11 +161,9 @@ class MainWindow(QMainWindow):
         return panel
 
     def load_obj(self):
-        """Load a 3D object file"""
         filename, _ = QFileDialog.getOpenFileName(
             self, 
-            "Open 3D Object", 
-            "obj/",  # Start in obj directory
+            "Open 3D Object",  
             "OBJ Files (*.obj);;All Files (*)"
         )
         if filename:
@@ -198,7 +191,6 @@ class MainWindow(QMainWindow):
                 self.status_bar.showMessage("Failed to load object")
 
     def apply_rotation(self):
-        """Apply quaternion rotation to the loaded object"""
         if self.opengl_widget.mesh is None:
             self.status_bar.showMessage("Please load an object first")
             return
@@ -223,31 +215,7 @@ class MainWindow(QMainWindow):
         except ValueError:
             self.status_bar.showMessage("Invalid input values")
 
-    def load_demo_car(self):
-        """Load the demo car model"""
-        import os
-        demo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "obj", "Car.obj")
-        if os.path.exists(demo_path):
-            self.status_bar.showMessage("Loading demo car...")
-            success = self.opengl_widget.load_mesh(demo_path)
-            
-            if success:
-                if self.opengl_widget.mesh:
-                    vertex_count = len(self.opengl_widget.mesh.vertices)
-                    face_count = len(self.opengl_widget.mesh.faces)
-                    self.object_info_label.setText(
-                        f"Loaded: Car.obj (Demo)\n"
-                        f"Vertices: {vertex_count:,}\n"
-                        f"Faces: {face_count:,}"
-                    )
-                    self.status_bar.showMessage("Demo car loaded successfully")
-            else:
-                self.status_bar.showMessage("Failed to load demo car")
-        else:
-            self.status_bar.showMessage("Demo car file not found")
-
     def update_visualizations(self):
-        """Update visualization settings in OpenGL widget"""
         self.opengl_widget.show_axes = self.show_axes_checkbox.isChecked()
         self.opengl_widget.show_rotation_axis = self.show_rotation_axis_checkbox.isChecked()
         self.opengl_widget.show_angle_label = self.show_angle_label_checkbox.isChecked()
